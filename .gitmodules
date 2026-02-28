@@ -1,0 +1,3 @@
+[submodule "external/as"]
+	path = external/as
+	url = git@github.com:jahan-addison/comstedt-as.git
