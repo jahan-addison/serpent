@@ -1,117 +1,233 @@
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Copyright (c) 2026 Jahan Addison
+  ;; All rights reserved.
+  ;;
+  ;; Redistribution and use in source and binary forms, with or without
+  ;; modification, are permitted provided that the following conditions are met:
+  ;;
+  ;; 1. Redistributions of source code must retain the above copyright notice, this
+  ;;    list of conditions and the following disclaimer.
+  ;;
+  ;; 2. Redistributions in binary form must reproduce the above copyright notice,
+  ;;    this list of conditions and the following disclaimer in the documentation
+  ;;    and/or other materials provided with the distribution.
+  ;;
+  ;; THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+  ;; ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIEDi
+  ;; WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+  ;; DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+  ;; ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+  ;; (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+  ;; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+  ;; ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+  ;; (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  ;; SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
   .include "sfr.i"
 
-;; VARIABLES
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+  ;; Bank 1 General Purpose Address Space
+  ;;
+  ;; 256 addresses ($00–$FF) are available for general-purpose data in bank 1:
+  ;;
+  ;;  $00–$0F: These double as the indirect register pointer cells (@R0–@R3 read
+  ;;    their addresses from here depending on IRBK bits in PSW)
+  ;;  $10–$FF: Orthogonal general purpose address space, 240 bytes
+  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-X       = $33 ; horizontal position in frame buffer
-Y       = $34 ; vertical position in frame buffer
+  ;;;;;;;;;;;;;;;
+  ;; Variables ;;
+  ;;;;;;;;;;;;;;;
 
-;; Reset and Interrupt Vectors
+X = $33   ; horizontal position in frame buffer
+Y = $34   ; vertical position in frame buffer
 
- .org    0
- jmpf    start
+direction = $30   ; movement direction (0 = horizontal, 1 = vertical)
+serpent_size = $31  ; size of serpent, set to 0 at game start, winning size is 7
+serpent_speed = $35   ; speed of serpent, "1" at game start
 
- .org    $3
- jmp     nop_irq
+  ;; The "piece" that the serpent eats
 
- .org    $b
- jmp     nop_irq
+piece_x = $36   ; horizontal position of piece on screen
+piece_y = $37   ; vertical position of piece on screen
 
- .org    $13
- jmp     nop_irq
+seed = $38    ; random seed
 
- .org    $1b
- jmp     t1int
+  ;; Serpent's tail coordinate addresses
 
- .org    $23
- jmp     nop_irq
+serpent_x1 = $39
+serpent_y1 = $3A
+serpent_x2 = $3B
+serpent_y2 = $3C
+serpent_x3 = $3D
+serpent_y3 = $3E
+serpent_x4 = $40
+serpent_y4 = $41
+serpent_x5 = $42
+serpent_y5 = $43
+serpent_x6 = $44
+serpent_y6 = $45
+serpent_x7 = $46
+serpent_y7 = $47
 
- .org    $2b
- jmp     nop_irq
 
- .org    $33
- jmp     nop_irq
+  ;; Reset and interrupt vectors
 
- .org    $3b
- jmp     nop_irq
+	.org	0
 
- .org    $43
- jmp     nop_irq
+	jmpf	start
 
- .org    $4b
- clr1    p3int,0
- clr1    p3int,1
+	.org	$3
 
+	jmp	nop_irq
+
+	.org	$b
+
+	jmp	nop_irq
+
+	.org	$13
+
+	jmp	nop_irq
+
+	.org	$1b
+
+	jmp	t1int
+
+	.org	$23
+
+	jmp	nop_irq
+
+	.org	$2b
+
+	jmp	nop_irq
+
+	.org	$33
+
+	jmp	nop_irq
+
+	.org	$3b
+
+	jmp	nop_irq
+
+	.org	$43
+
+	jmp	nop_irq
+
+	.org	$4b
+
+	clr1	p3int,0
+	clr1	p3int,1
 nop_irq:
- reti
+	reti
 
- .org    $130
+
+	.org	$130
+
 t1int:
- push    ie
- clr1    ie,7
- not1    ext,0
- jmpf    t1int
- pop     ie
- reti
+	push	ie
+	clr1	ie,7
+	not1	ext,0
+	jmpf	t1int
+	pop	ie
+	reti
 
- .org    $1f0
+
+	.org	$1f0
+
 goodbye:
- not1    ext,0
- jmpf    goodbye
+	not1	ext,0
+	jmpf	goodbye
 
 
-;;  Game Header
+  ;; Header
 
- .org    $200
- .byte   "VMU-it          "
- .byte   "written: jahan.addison@jacata.me"
+  .org    $200
+  .byte	"Serpent         "
+  .byte	"Snake on the VMS - Jahan Addison"
 
-;;  Game Icon
+	;; Icon header
 
-  .org    $240
-  .word   1               ; number of icons (max = 3)
-  .word   10              ; animation speed
-  .org    $260
-  .word   $f000, $ff00, $f0f0, $f00f, $fff0, $faff, $ff1f, $ffff
-  ; black, red, green, blue, yellow, cyan, purple, white
-  .word   $ffff, $ffff, $ffff, $ffff, $ffff, $ffff, $ffff, $ffff
-  ; white, white, white, white, white, white, white, white
+	.org	$240
 
-  .org    $280
+	.word	2,10		; Two frames
 
-  ; A sample icon for now, just a yellow background
+	;; Icon palette
 
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
-  .byte $44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44,$44
+	.org	$260
+
+	.word	$0000, $fcfc, $f0a0, $f0f0, $fccf, $f00a, $f00f, $ffff
+	.word	$ffff, $ffff, $ffff, $ffff, $ffff, $ffff, $ffff, $ffff
+
+	;; Icon
+
+	.org	$280
+
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$11,$11,$11,$11,$11,$10,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$33,$33,$31,$33,$33,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$01,$11,$11,$11,$11,$11,$10,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$01,$33,$33,$31,$33,$33,$30,$00,$00,$00
+	.byte	$00,$00,$00,$04,$44,$44,$40,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$60,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$60,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$60,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$60,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$66,$66,$60,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$44,$44,$44,$44,$44,$44,$44,$44,$40,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$66,$66,$64,$66,$66,$64,$66,$66,$60,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$11,$11,$11,$11,$11,$10,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$22,$22,$31,$22,$22,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$01,$33,$33,$31,$33,$33,$30,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$04,$44,$44,$41,$11,$11,$11,$11,$11,$10,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$61,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$61,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$61,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$61,$22,$22,$31,$22,$22,$30,$00,$00,$00
+	.byte	$00,$00,$00,$04,$66,$66,$61,$33,$33,$31,$33,$33,$30,$00,$00,$00
+	.byte	$00,$00,$00,$04,$44,$44,$44,$44,$44,$44,$44,$44,$40,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$55,$55,$64,$55,$55,$64,$55,$55,$60,$00,$00,$00
+	.byte	$00,$00,$00,$04,$66,$66,$64,$66,$66,$64,$66,$66,$60,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
+	.byte	$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00,$00
 
 
  ;
@@ -120,14 +236,16 @@ goodbye:
 
 start:
   ; For any game:
-  mov #$a1,ocr
-  mov #$09,mcr
-  mov #$80,vccr
-  clr1 p3int,0
-  clr1 p1,7
-  mov #$ff,p3
+	clr1 ie,7
+	mov #$a1,ocr
+	mov #$09,mcr
+	mov #$80,vccr
+	clr1 p3int,0
+	clr1 p1,7
+	mov #$ff,p3
 
   call clrscr
+  mov #0,xbnk       ; ensure we draw into bank 0 (upper screen)
   mov #3,X
   mov #$f,Y
   mov #$F8,2
@@ -156,10 +274,12 @@ start:
   .movedown:
   call pause
   call movedown
+  call pause
   br .done
   .moveup:
   call pause
   call moveup
+  call pause
   br .done
 
   .done:
@@ -169,6 +289,7 @@ start:
 ; Subroutines.
 
 moveup:
+  clr1 ocr,5
   ld Y
   ; check if top of buffer
   be #0,.up
@@ -214,10 +335,12 @@ moveup:
   st 2
   br .upcontt
   .up:
+  set1 ocr,5
   ret
 
 
 moveright:
+  clr1 ocr,5
   ld X
   ; check if buffer cannot move right any further
   be #6,.right
@@ -259,10 +382,12 @@ moveright:
   .rightdone:
   inc X
   .right:
+  set1 ocr,5
   ret
 
 
 moveleft:
+  clr1 ocr,5
   ld X
   ; check if buffer cannot move left any further
   be #0,.left
@@ -271,6 +396,7 @@ moveleft:
   .leftcontinue:
   ; move left
   ld @R2
+  clr1 psw,7        ; clear carry before rotate (matches moveright pattern)
   rolc
   ; check the carry flag for overflow of our bit, which
   ; means it's time to move to the preceding byte
@@ -303,10 +429,12 @@ moveleft:
   .leftdone:
   dec X
   .left:
+  set1 ocr,5
   ret
 
 
 movedown:
+  clr1 ocr,5
   ld Y
   ; check if bottom of buffer
   be #$1F,.down
@@ -352,21 +480,23 @@ movedown:
   st 2
   br .downcontt
   .down:
+  set1 ocr,5
   ret
 
 
 pause:
   mov #0,b
   .start:
+  mov #0,t1lc       ; compare = 0: pulse stays high (no beep) while timer runs
   mov #1,t1lr
-  mov #$48,t1cnt
+  mov #$48,t1cnt    ; T1LRUN (bit 6) = 1, starts T1L
   .run:
   ld t1lr
   bne #$ff,.run
   inc b
   ld b
  ; bne #1,.start
-  clr1 t1cnt, 7
+  mov #0,t1cnt      ; clear all T1 bits, stops T1L (bit 6) and T1H (bit 7)
   ret
 
 
@@ -445,16 +575,14 @@ quit:
   jmp goodbye
 
 sleep:
-  set1 pcon,0
-  bn p3,7,sleep
-  mov #0,vccr
+  bn p3,7,sleep		; wait for SLEEP to be depressed (released)
+  mov #0,vccr		; blank LCD before halting
 sleepmore:
-  set1 pcon,0
-  bp p7,0,quit
-  bp p3,7,sleepmore
-  mov #$80,vccr
+  set1 pcon,0		; enter HALT mode
+  bp p7,0,quit		; docked?
+  bp p3,7,sleepmore	; no SLEEP press yet
+  mov #$80,vccr		; re-enable LCD
 waitsleepup:
-  set1 pcon,0
   bn p3,7,waitsleepup
   br getkeys
 

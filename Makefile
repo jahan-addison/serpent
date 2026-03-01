@@ -1,1 +1,0 @@
-git submodule add git@github.com:jahan-addison/comstedt-as.git external/as

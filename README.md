@@ -1,23 +1,25 @@
-# serpent
-
-### Overview
-
-A recharged take at "snake" for the VMU device's firmware, CPU, and LCD frame buffer as an experienced engineer. My first incomplete version from 15 years ago can be found [here](https://github.com/jahan-addison/epli/tree/throwback).
-
-The CPU in the VMS _(dubbed, "the potato")_ is a customized Sanyo microcontroller which is code compatible with the LC86000 series.
-The VMU flash memory contains 128 kilobytes of storage. These are divided into 256 blocks of 512 bytes each. Of these blocks, 200 are available for user files.
-The rest of the blocks contain filesystem information, or are simply not used at all.
-
+<h1 align="center">serpent 🐍</h1>
 
 <h5 align="center"> VMS: The dreamcast memory card peripheral device </h5>
 <p align="center">
    <img src="/docs/screenshot.png">
 </p>
 
+### Overview
+
+A recharged take at "snake" for the VMU device's firmware, CPU, and LCD frame buffer as an experienced engineer. My first incomplete version from 15 years ago can be found [here](https://github.com/jahan-addison/serpent/tree/throwback).
+
+* The microcontroller: https://mc.pp.se/dc/vms/cpu.html
+* The flash memory: https://mc.pp.se/dc/vms/flashmem.html
+* The firmware: https://mc.pp.se/dc/vms/fw.html
 
 ---
 
-I have a fork of Marcus Comstedt's assembler that can be found [here](https://github.com/jahan-addison/comstedt-as).
+The CPU in the VMS _(dubbed, "the potato")_ is a customized Sanyo microcontroller which is code compatible with the LC86000 series.
+The VMU flash memory contains 128 kilobytes of storage. These are divided into 256 blocks of 512 bytes each. Of these blocks, 200 are available for user files.
+The rest of the blocks contain filesystem information, or are simply not used at all.
+
+I have a fork of Marcus Comstedt's assembler that can be found [here](https://github.com/jahan-addison/aslc86k-mc).
 
 ## Build
 
@@ -46,3 +48,6 @@ The game compiles to `build/serpent.vms`.
 * Extras: https://www.deco.franken.de/myfiles/myfiles.html
 
 
+# License
+
+#### Simplified BSD License
