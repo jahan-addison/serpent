@@ -11,9 +11,9 @@ A recharged take at "snake" for the VMU device's firmware, CPU, and LCD frame bu
 
 The CPU in the VMS _(dubbed, "the potato")_ is a customized Sanyo microcontroller which is code compatible with the LC86000 series.
 
-* The microcontroller: https://mc.pp.se/dc/vms/cpu.html
-* The flash memory: https://mc.pp.se/dc/vms/flashmem.html
-* The firmware: https://mc.pp.se/dc/vms/fw.html
+* The microcontroller: https://mc.pp.se/dc/vms/cpu.html ([pdf](/docs/mc-pp-se-dc-vms-cpu-html....pdf))
+* The flash memory: https://mc.pp.se/dc/vms/flashmem.html ([pdf](/docs/mc-pp-se-dc-vms-flashmem-html....pdf))
+* The firmware: https://mc.pp.se/dc/vms/fw.html ([pdf](/docs/mc-pp-se-dc-vms-fw-html....pdf))
 
 ### Resources
 
@@ -27,7 +27,7 @@ The CPU in the VMS _(dubbed, "the potato")_ is a customized Sanyo microcontrolle
 
 - CMake ≥ 3.16
 - bison and flex (required by the assembler)
-- The `external/as` submodule initialised:
+- The `external/as` submodule initialized:
   ```sh
   git submodule update --init
   ```
