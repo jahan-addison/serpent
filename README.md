@@ -19,9 +19,30 @@ The rest of the blocks contain filesystem information, or are simply not used at
 
 I have a fork of Marcus Comstedt's assembler that can be found [here](https://github.com/jahan-addison/comstedt-as).
 
+## Build
 
-* VMS software resource: https://mc.pp.se/dc/sw.html
-* VMS hardware resource: https://mc.pp.se/dc/hw.html
+### Requirements
+
+- CMake ≥ 3.16
+- bison and flex (required by the assembler)
+- The `external/as` submodule initialised:
+  ```sh
+  git submodule update --init
+  ```
+
+### Steps
+
+```sh
+cmake -B build
+cmake --build build
+```
+
+The game compiles to `build/serpent.vms`.
+
+# Resources
+
+* VMS software: https://mc.pp.se/dc/sw.html
+* VMS hardware: https://mc.pp.se/dc/hw.html
 * Extras: https://www.deco.franken.de/myfiles/myfiles.html
 
 

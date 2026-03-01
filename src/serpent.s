@@ -1,37 +1,3 @@
-;; Copyright 2013 Jahan Addison
-
-;; Permission is hereby granted, free of charge, to any person obtaining
-;; a copy of this software and associated documentation files (the
-;; "Software"), to deal in the Software without restriction, including
-;; without limitation the rights to use, copy, modify, merge, publish,
-;; distribute, sublicense, and/or sell copies of the Software, and to
-;; permit persons to whom the Software is furnished to do so, subject to
-;; the following conditions:
-
-;; The above copyright notice and this permission notice shall be
-;; included in all copies or substantial portions of the Software.
-
-;; THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
-;; EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
-;; MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-;; NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-;; LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
-;; OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
-;; WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-
-  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  ;; @vmu-it
-  ;; @author  <jahan.addison@jacata.me>
-  ;; @license MIT
-  ;; @version 0.1
-  ;;
-  ;;
-  ;; @changelog
-  ;;
-  ;;
-  ;;
-
   .include "sfr.i"
 
 ;; VARIABLES
@@ -42,7 +8,7 @@ Y       = $34 ; vertical position in frame buffer
 ;; Reset and Interrupt Vectors
 
  .org    0
- jmpf    start         
+ jmpf    start
 
  .org    $3
  jmp     nop_irq
@@ -90,14 +56,14 @@ t1int:
  .org    $1f0
 goodbye:
  not1    ext,0
- jmpf    goodbye     
+ jmpf    goodbye
 
 
 ;;  Game Header
 
  .org    $200
- .byte   "VMU-it          "                     
- .byte   "written: jahan.addison@jacata.me"     
+ .byte   "VMU-it          "
+ .byte   "written: jahan.addison@jacata.me"
 
 ;;  Game Icon
 
@@ -169,8 +135,8 @@ start:
 
 .keypress:
   call getkeys
-  bn acc,4,.keypress    
-  bn acc,5,.keypress     
+  bn acc,4,.keypress
+  bn acc,5,.keypress
   bn acc,3,.moveright
   bn acc,2,.moveleft
   bn acc,1,.movedown
@@ -196,8 +162,8 @@ start:
   call moveup
   br .done
 
-  .done:  
-  br .keypress            
+  .done:
+  br .keypress
 
 
 ; Subroutines.
@@ -262,7 +228,7 @@ moveright:
   ld @R2
   clr1 psw,7
   rorc
-  ; check the carry flag for overflow of our bit, which 
+  ; check the carry flag for overflow of our bit, which
   ; means it's time to move to the next byte
   bp psw,7,.rightnext
   st @R2
@@ -306,7 +272,7 @@ moveleft:
   ; move left
   ld @R2
   rolc
-  ; check the carry flag for overflow of our bit, which 
+  ; check the carry flag for overflow of our bit, which
   ; means it's time to move to the preceding byte
   bp psw,7,.leftnext
   st @R2
@@ -339,7 +305,7 @@ moveleft:
   .left:
   ret
 
-   
+
 movedown:
   ld Y
   ; check if bottom of buffer
@@ -393,7 +359,7 @@ pause:
   mov #0,b
   .start:
   mov #1,t1lr
-  mov #$48,t1cnt 
+  mov #$48,t1cnt
   .run:
   ld t1lr
   bne #$ff,.run
@@ -401,9 +367,9 @@ pause:
   ld b
  ; bne #1,.start
   clr1 t1cnt, 7
-  ret  
-           
-    
+  ret
+
+
 clrscr:
   clr1 ocr,5
   push acc
@@ -470,26 +436,26 @@ setscr:
   ret
 
 getkeys:
-  bp p7,0,quit           
-  ld p3                  
-  bn acc,6,quit         
-  bn acc,7,sleep          
-  ret                    
+  bp p7,0,quit
+  ld p3
+  bn acc,6,quit
+  bn acc,7,sleep
+  ret
 quit:
-  jmp goodbye            
-                      
+  jmp goodbye
+
 sleep:
-  set1 pcon,0            
-  bn p3,7,sleep          
-  mov #0,vccr            
+  set1 pcon,0
+  bn p3,7,sleep
+  mov #0,vccr
 sleepmore:
-  set1 pcon,0             
-  bp p7,0,quit            
-  bp p3,7,sleepmore      
-  mov #$80,vccr          
+  set1 pcon,0
+  bp p7,0,quit
+  bp p3,7,sleepmore
+  mov #$80,vccr
 waitsleepup:
-  set1 pcon,0            
+  set1 pcon,0
   bn p3,7,waitsleepup
-  br getkeys             
+  br getkeys
 
   .cnop   0,$200          ; pad to an even number of blocks

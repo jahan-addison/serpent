@@ -1,6 +1,6 @@
 
 *
-* Special Function Register addresses
+* Register addresses mappings
 *
 
 ACC	EQU	$100
